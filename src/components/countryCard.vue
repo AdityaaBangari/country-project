@@ -21,9 +21,9 @@
     <div class="row my-3" v-for="country in countries" :key="country.id">
       <div class="col-12">
         <div class="container-fluid d-flex justify-content-center">
-          <div class="row w-50 px-2 py-3 country-card">
+          <div class="row  px-2 py-3 country-card">
             <div class="col-6 ">
-              <img class="img-fluid h-100" :src="country.flags.png" :alt="country.flags.alt">
+              <img class="img-fluid flagImg" :src="country.flags.png" :alt="country.flags.alt">
             </div>
             <div class="col-6 d-flex justify-content-between flex-column">
               <div>
@@ -31,16 +31,16 @@
                   <b>{{ country.name.common }}</b>
                 </h3>
                 <h5 class="text-start">
-                  <b>Currency:</b> {{ getCurrency(country).code }} ({{ getCurrency(country).name }})
+                  <b class="heading">Currency:</b><span class="value">{{ getCurrency(country).name }} </span>
                 </h5>
                 <h5 class="text-start">
-                  <b>Current date and time:</b> {{ country.timezones[0] }}
+                  <b class="heading">Current date and time:</b> <span class="value">{{ getTime(country.timezones) }}</span>
                 </h5>
               </div>
               <div class="d-flex justify-content-between">
-                <button class="btn btn-primary countryBtn" v-on:click="showMap(country)">Show Map</button>
+                <button class="btn  countryBtn1" v-on:click="showMap(country)">Show Map</button>
 
-                <button class="btn btn-primary countryBtn" v-on:click="goToDetails(country.cca3)">Details</button>
+                <button class="btn  countryBtn2" v-on:click="goToDetails(country.cca3)">Details</button>
 
               </div>
             </div>
@@ -163,15 +163,39 @@ const searchCountry = computed(() => {
     return filteredCountries;
   }
 });
-const getCurrentDateTime = (country) => {
-  const timezone = country.timezones[0]; // Assuming the first timezone is the primary one
-  const date = new Date().toLocaleString('en-US', {
-    timeZone: timezone,
-    timeZoneName: 'short',
-    hour12: false
-  });
-  return date;
-};
+function getTime(timezones) {
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    try {
+        // let t = timezones.length == 1?timezones[0]:timezones[(timezones.length/2)-1]
+        const t = timezones[0];
+        const s = t.match(/\d+/g);
+        const sign = t.substring(3, 4) === "+" ? 1 : -1;
+        const offset = sign * (Number(s[0]) + (Number(s[1]) / 60))
+        const d = new Date();
+        const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+        const nd = new Date(utc + (3600000 * offset));
+ 
+        let date = nd.getDate();
+        if (date == "1" || date == "21" || date == "31") {
+            date = date + "st";
+        } else if (date == "2" || date == "22") {
+            date = date + "nd";
+        } else if (date == "3" || date == "33") {
+            date = date + "rd";
+        } else {
+            date = date + "th";
+        }
+ 
+        let month = months[nd.getMonth()];
+        let year = nd.getFullYear();
+        let time = nd.getTime();
+        // return nd.toLocaleString();
+        return date + " " + month + " " + nd.getFullYear() + ", " + nd.getHours() + ":" + nd.getMinutes();
+    } catch (error) {
+        return 0;
+    }
+ 
+}
 
 const getCurrency = (country) => {
   // Check if the `currencies` property exists and is not empty
@@ -202,7 +226,7 @@ onMounted(fetchCountries);
 }
 
 .searchbar {
-  width: 45% !important;
+  width: 55% !important;
   border: 1px solid lightgrey;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
@@ -223,11 +247,42 @@ onMounted(fetchCountries);
   /* box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; */
   box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
   border-radius: 6px;
+  width: 60%;
 }
-.countryBtn{
+.countryBtn1{
   background-color: white;
-  color: blue;
-  border: none;
+  color: #0C22CB;
+  border: 1px solid #0C22CB;
+  border-radius: 0;
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  width: 50%;
+}
+.countryBtn2 {
+  background-color: white;
+  color: #0C22CB;
+  border: 1px solid #0C22CB;
+  border-radius: 0;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  width: 45%;
+}
+.countryBtn1:hover {
+  background-color: #0C22CB;
+  color: white
+}
+.countryBtn2:hover {
+  background-color: #0C22CB;
+  color: white
+}
+.heading {
+  font-size: 17px;
+}
+.value{
+  font-size: 16px;
+}
+.flagImg{
+  min-height: 165px;
+  max-height: 165px;
+  width: 100%;
+  object-fit: cover;
 }
 </style>
